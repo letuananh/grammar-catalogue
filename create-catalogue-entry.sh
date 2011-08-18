@@ -13,7 +13,7 @@
 ##               Joshua Crowgey, Petter Haugereid, Sanghoun Song, and
 ##               David Wax (comments and ideas)
 ##
-## License: See the LICENSE file for information.
+## License: MIT; See the LICENSE file for terms.
 ##
 ## Requirements:
 ##   * subversion must be installed for svn metrics
