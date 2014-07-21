@@ -49,6 +49,7 @@ log() {
     fi
 }
 
+
 ### COMMAND LINE ARGUMENTS ###
 
 usage() {
@@ -59,14 +60,15 @@ usage() {
     echo "  -d|--debug : print debug messages"
     echo "  -q|--quiet : suppress warning messages"
     echo "  -l|--latex : format output for LaTeX"
+    echo "  -w|--www   : format output as HTML"
     echo "Arguments:"
     echo "  PATH: (optional) create catalogue entry for grammar at PATH"
     echo "        or the current directory if unspecified"
     exit 1
 }
 
-longopts="help debug quiet latex"
-shortopts="hdql"
+longopts="help debug quiet latex www"
+shortopts="hdqlw"
 
 set -- `getopt -n$0 -u --longoptions="$longopts" --options="$shortopts" -- "$@"` || usage
 
@@ -76,6 +78,7 @@ while [ $# -gt 0 ]; do
        --debug|-d) verbosity=$DBG_LVL; shift ;;
        --quiet|-q) verbosity=$ERR_LVL; shift ;;
        --latex|-l) formatter=latex; shift ;;
+       --www|-w) formatter=html; shift ;;
        --) shift; break ;;
     esac
 done
@@ -184,10 +187,24 @@ if [[ ! ( "$BIB_URL" || "$PDF_URL" || "$CITE" ) ]]; then
 else
     CITATION="$CITE"
     if [ "$BIB_URL" ]; then
-        CITATION="$CITATION ([$BIB_URL .bib])"
+	case "$formatter" in
+	    moinmoin)
+		CITATION="$CITATION ([$BIB_URL .bib])"
+		;;
+	    html)
+		CITATION="$CITATION (<a href='${BIB_URL}'>.bib</a>)"
+		;;
+	esac
     fi
     if [ "$PDF_URL" ]; then
-        CITATION="$CITATION ([$PDF_URL .pdf])"
+	case "$formatter" in
+	    moinmoin)
+		CITATION="$CITATION ([$PDF_URL .pdf])"
+		;;
+	    html)
+		CITATION="$CITATION (<a href='${PDF_URL}'>.pdf</a>)"
+		;;
+	esac
     fi
 fi
 debug "Citation: $CITATION"
@@ -252,6 +269,7 @@ case "$formatter" in
         # Default formatting for Moinmoin wiki
         cs="||" # column start
         cm="||" # column delimiter (middle)
+        cmn=$cm # column delimiter for numbers
         ce="||" # column end
         table_header="$cs [#$SHORT_GRAMMAR_NAME $GRAMMAR_NAME ($SHORT_GRAMMAR_NAME)] $cm $LANGUAGE_NAME $cm $MAINTAINER $ce\n\n== $GRAMMAR_NAME ($SHORT_GRAMMAR_NAME) ==\n[[Anchor($SHORT_GRAMMAR_NAME)]]\n''Published $pub_date''"
         table_footer=""
@@ -265,9 +283,26 @@ case "$formatter" in
         table_header='\\begin{tabular}{ll}'
         cs=" "
         cm="&"
+        cmn=$cm
         ce="\\\\"
         table_footer='\\end{tabular}'
         ;;
+    html)
+        # HTML formatting 
+        table_header="<table><caption>$GRAMMAR_NAME ($SHORT_GRAMMAR_NAME)</caption>"
+        cs="<tr><th align='left'>"
+        cm="</th><td>"
+        cmn="</th><td align='right'>"
+        ce="</td></tr>"
+        table_footer='</table>'
+	# URLS
+	CONTACT_EMAIL="<a href='mailto:${CONTACT_EMAIL}?Subject=[${SHORT_GRAMMAR_NAME}]'>${CONTACT_EMAIL}</a>"
+	WEBSITE="<a href='${WEBSITE}'>${WEBSITE}</a>"
+	DEMO_WEBSITE="<a href='${DEMO_WEBSITE}'>${DEMO_WEBSITE}</a>"
+	DOCUMENTATION_URL="<a href='${DOCUMENTATION_URL}'>${DOCUMENTATION_URL}</a>"
+	ISSUE_TRACKER="<a href='${ISSUE_TRACKER}'>${ISSUE_TRACKER}</a>"
+        ;;
+
 esac
 
 echo -e "$table_header"
@@ -286,9 +321,9 @@ echo "$cs license                     $cm $LICENSE $ce"
 echo "$cs grammar type                $cm $GRAMMAR_TYPE $ce"
 echo "$cs required external resources $cm $EXTERNAL_RESOURCES $ce"
 echo "$cs associated resources        $cm $ASSOCIATED_RESOURCES $ce"
-echo "$cs lexical items               $cm $LEXICAL_ITEMS $ce"
-echo "$cs lexical rules               $cm $LEXICAL_RULES $ce"
-echo "$cs grammar rules               $cm $GRAMMAR_RULES $ce"
-echo "$cs features                    $cm $FEATURES $ce"
-echo "$cs types (with glb)            $cm $TYPES_WITH_GLB $ce"
+echo "$cs lexical items               $cmn $LEXICAL_ITEMS $ce"
+echo "$cs lexical rules               $cmn $LEXICAL_RULES $ce"
+echo "$cs grammar rules               $cmn $GRAMMAR_RULES $ce"
+echo "$cs features                    $cmn $FEATURES $ce"
+echo "$cs types (with glb)            $cmn $TYPES_WITH_GLB $ce"
 echo -e "$table_footer"
