@@ -5,7 +5,7 @@
 ##
 ##    Automatically extract grammar info and format it for the Grammar
 ##    Catalogue wiki at http://wiki.delph-in.net/moin/GrammarCatalogue,
-##    or for LaTeX.
+##    for LaTeX, or for HTML.
 ##
 ## Author: Michael Wayne Goodman (goodmami@uw.edu)
 ## Contributors: Francis Bond and Dan Flickinger (LISP function);
