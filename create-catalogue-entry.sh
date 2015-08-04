@@ -252,7 +252,7 @@ LISP
     } | ${LOGONROOT}/bin/logon --binary -I base 2>/dev/null >/dev/null
 }
 
-grammar_metrics=$(tempfile -d ./)
+grammar_metrics=$(mktemp "$(basename $0).XXXXXX")
 debug "Attempting to get grammar metrics by loading the grammar with the LKB. Temporary file created: $grammar_metrics"
 get_meta "$dir" "$grammar_metrics"
 source "$grammar_metrics"
